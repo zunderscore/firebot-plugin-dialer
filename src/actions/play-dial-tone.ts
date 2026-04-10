@@ -3,31 +3,27 @@ import { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-t
 import { PLUGIN_ID } from "../constants";
 import { delay } from "../shared";
 
-type DialNumberEffectData = {
-    numberToDial: string;
+type PlayDialToneEffectData = {
     toneLength: number;
-    delayBetween: number;
     volume: number;
     audioOutputDevice: FirebotAudioOutputDevice;
     overlayInstance: string;
     waitForSound: boolean;
 }
 
-type DialNumberEffectOverlayData = {
-    tones: Array<Array<number>>;
+type PlayDialToneEffectOverlayData = {
     toneLength: number;
-    delayBetween: number;
     volume: number;
 }
 
-const DialNumberEffect: Effects.EffectType<
-    DialNumberEffectData,
-    DialNumberEffectOverlayData
+const PlayDialToneEffect: Effects.EffectType<
+    PlayDialToneEffectData,
+    PlayDialToneEffectOverlayData
 > = {
     definition: {
-        id: `${PLUGIN_ID}:dial-number`,
-        name: "Dial Number",
-        description: "Play DTMF tones to simulate dialing a phone number",
+        id: `${PLUGIN_ID}:play-dial-number`,
+        name: "Play Dial Tone",
+        description: "Play a dial tone",
         icon: "fad fa-phone",
         categories: ["fun",  "overlay"]
     },
@@ -37,23 +33,11 @@ const DialNumberEffect: Effects.EffectType<
         }
     },
     optionsTemplate: `
-        <eos-container header="Number to Dial">
-            <firebot-input
-                input-title="Number to dial"
-                model="effect.numberToDial"
-                placeholder-text="Example: 212 555 1234" />
-        </eos-container>
-
         <eos-container header="Settings">
             <firebot-input
-                input-title="Duration of each tone (in ms)"
+                input-title="Duration of the dial tone (in ms)"
                 model="effect.toneLength"
                 placeholder-text="Example: 200"
-                style="margin-bottom: 2rem;" />
-            <firebot-input
-                input-title="Delay between tones (in ms)"
-                model="effect.delayBetween"
-                placeholder-text="Example: 50"
                 style="margin-bottom: 2rem;" />
             <firebot-checkbox
                 model="effect.waitForSound"
@@ -75,43 +59,16 @@ const DialNumberEffect: Effects.EffectType<
         <eos-overlay-instance effect="effect" pad-top="true"></eos-overlay-instance>
     `,
     onTriggerEvent: async ({ effect, sendDataToOverlay }) => {
-        const tones: Record<string, Array<number>> = {
-            "1": [697, 1209],
-            "2": [697, 1336],
-            "3": [697, 1477],
-            "4": [770, 1209],
-            "5": [770, 1336],
-            "6": [770, 1477],
-            "7": [852, 1209],
-            "8": [852, 1336],
-            "9": [852, 1477],
-            "*": [941, 1209],
-            "0": [941, 1336],
-            "#": [941, 1477],
-        };
-
-        const numbersToDial = [...effect.numberToDial];
-        const tonesToDial = [];
-
-        for (const num of numbersToDial) {
-            if (tones.hasOwnProperty(num)) {
-                tonesToDial.push(tones[num]);
-            }
-        }
-
         const volume = effect.volume / 10;
-        const totalDuation = (tonesToDial.length * effect.toneLength) + ((tonesToDial.length - 1) * effect.delayBetween);
 
         if (effect.audioOutputDevice.deviceId === "overlay") {
             sendDataToOverlay({
-                tones: tonesToDial,
                 toneLength: effect.toneLength,
-                delayBetween: effect.delayBetween,
                 volume: volume
             }, effect.overlayInstance);
 
             if (effect.waitForSound) {
-                await delay(totalDuation);
+                await delay(effect.toneLength);
             }
         } else {
 
@@ -121,9 +78,8 @@ const DialNumberEffect: Effects.EffectType<
     },
     overlayExtension: {
         event: {
-            name: `${PLUGIN_ID}:dial-numbers`,
+            name: `${PLUGIN_ID}:play-dial-tone`,
             onOverlayEvent: async (data) => {
-                const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
                 const audioCtx = new AudioContext();
                 const gainNode = new GainNode(audioCtx, { gain: data.volume });
                 gainNode.connect(audioCtx.destination);
@@ -145,15 +101,10 @@ const DialNumberEffect: Effects.EffectType<
                     });
                 }
 
-                for (let x = 0; x < data.tones.length - 1; x++) {
-                    await playTone(data.tones[x]);
-                    await delay(data.delayBetween);
-                }
-
-                await playTone(data.tones[data.tones.length - 1]);
+                await playTone([350, 440]);
             }
         }
     }
 }
 
-export default DialNumberEffect;
+export default PlayDialToneEffect;

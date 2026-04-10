@@ -6,6 +6,7 @@ import {
 } from "./constants";
 
 import DialNumberEffect from "./actions/dial-numbers";
+import PlayDialToneEffect from "./actions/play-dial-tone";
 
 const packageInfo = require("../package.json");
 
@@ -36,6 +37,7 @@ const script: Firebot.CustomScript = {
 
         logDebug("Registering effects...");
         effectManager.registerEffect(DialNumberEffect as Effects.EffectType<unknown>);
+        effectManager.registerEffect(PlayDialToneEffect as Effects.EffectType<unknown>);
 
         logInfo("Plugin ready.");
     },
@@ -44,6 +46,7 @@ const script: Firebot.CustomScript = {
 
         logDebug("Removing effects");
         effectManager.unregisterEffect(DialNumberEffect.definition.id);
+        effectManager.unregisterEffect(PlayDialToneEffect.definition.id);
 
         logInfo("Plugin stopped.");
     }
