@@ -1,7 +1,8 @@
+import type { DialNumberData } from "../types";
 import { Effects } from "@crowbartools/firebot-custom-scripts-types/types/effects";
 import { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-types/types/settings";
-import { PLUGIN_ID } from "../constants";
-import { delay } from "../shared";
+import { PLUGIN_ID, FRONTEND_EVENT_DIAL_NUMBER } from "../constants";
+import { SharedModules, delay } from "../shared";
 
 type DialNumberEffectData = {
     numberToDial: string;
@@ -13,16 +14,9 @@ type DialNumberEffectData = {
     waitForSound: boolean;
 }
 
-type DialNumberEffectOverlayData = {
-    tones: Array<Array<number>>;
-    toneLength: number;
-    delayBetween: number;
-    volume: number;
-}
-
 const DialNumberEffect: Effects.EffectType<
     DialNumberEffectData,
-    DialNumberEffectOverlayData
+    DialNumberData
 > = {
     definition: {
         id: `${PLUGIN_ID}:dial-number`,
@@ -72,7 +66,7 @@ const DialNumberEffect: Effects.EffectType<
 
         <eos-audio-output-device effect="effect" pad-top="true"></eos-audio-output-device>
         
-        <eos-overlay-instance effect="effect" pad-top="true"></eos-overlay-instance>
+        <eos-overlay-instance effect="effect" ng-if="effect.audioOutputDevice && effect.audioOutputDevice.deviceId === 'overlay'" pad-top="true"></eos-overlay-instance>
     `,
     onTriggerEvent: async ({ effect, sendDataToOverlay }) => {
         const tones: Record<string, Array<number>> = {
@@ -109,12 +103,18 @@ const DialNumberEffect: Effects.EffectType<
                 delayBetween: effect.delayBetween,
                 volume: volume
             }, effect.overlayInstance);
-
-            if (effect.waitForSound) {
-                await delay(totalDuation);
-            }
         } else {
+            SharedModules.frontendCommunicator.send(FRONTEND_EVENT_DIAL_NUMBER, {
+                tones: tonesToDial,
+                toneLength: effect.toneLength,
+                delayBetween: effect.delayBetween,
+                volume: volume,
+                audioOutputDevice: effect.audioOutputDevice
+            });
+        }
 
+        if (effect.waitForSound) {
+            await delay(totalDuation);
         }
 
         return true;
