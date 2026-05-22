@@ -6,8 +6,11 @@ import {
 } from "./constants";
 import { SharedModules } from "./shared";
 
-import DialNumberEffect from "./actions/dial-numbers";
+import DialNumberEffect from "./actions/dial-number";
 import PlayDialToneEffect from "./actions/play-dial-tone";
+import PlayBusySignalEffect from "./actions/play-busy-signal";
+import PlayWrongNumberEffect from "./actions/play-wrong-number";
+import PlayRingbackToneEffect from "./actions/play-ringback-tone";
 import DialerUIExtension from "./ui-extension";
 
 const packageInfo = require("../package.json");
@@ -42,6 +45,9 @@ const script: Firebot.CustomScript = {
         logDebug("Registering effects...");
         effectManager.registerEffect(DialNumberEffect as Effects.EffectType<unknown>);
         effectManager.registerEffect(PlayDialToneEffect as Effects.EffectType<unknown>);
+        effectManager.registerEffect(PlayBusySignalEffect as Effects.EffectType<unknown>);
+        effectManager.registerEffect(PlayWrongNumberEffect as Effects.EffectType<unknown>);
+        effectManager.registerEffect(PlayRingbackToneEffect as Effects.EffectType<unknown>);
 
         logDebug("Registering UI extension...");
         uiExtensionManager?.registerUIExtension(DialerUIExtension);
@@ -54,6 +60,9 @@ const script: Firebot.CustomScript = {
         logDebug("Removing effects");
         effectManager.unregisterEffect(DialNumberEffect.definition.id);
         effectManager.unregisterEffect(PlayDialToneEffect.definition.id);
+        effectManager.unregisterEffect(PlayBusySignalEffect.definition.id);
+        effectManager.unregisterEffect(PlayWrongNumberEffect.definition.id);
+        effectManager.unregisterEffect(PlayRingbackToneEffect.definition.id);
 
         logInfo("Plugin stopped.");
     }

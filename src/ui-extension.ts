@@ -1,6 +1,12 @@
 import type { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-types/types/settings";
 import type { UIExtension } from "@crowbartools/firebot-custom-scripts-types/types/modules/ui-extension-manager";
-import type { DialNumberData, DialToneData } from "./types";
+import type {
+    BusySignalData,
+    DialNumberData,
+    DialToneData,
+    RingbackToneData,
+    WrongNumberData
+} from "./types";
 
 type FrontendDialNumberData = DialNumberData & {
     audioOutputDevice: FirebotAudioOutputDevice
@@ -8,6 +14,18 @@ type FrontendDialNumberData = DialNumberData & {
 
 type FrontendDialToneData = DialToneData & {
     audioOutputDevice: FirebotAudioOutputDevice
+}
+
+type FrontendBusySignalData = BusySignalData & {
+    audioOutputDevice: FirebotAudioOutputDevice
+}
+
+type FrontendWrongNumberData = WrongNumberData & {
+    audioOutputDevice: FirebotAudioOutputDevice;
+}
+
+type FrontendRingbackToneData = RingbackToneData & {
+    audioOutputDevice: FirebotAudioOutputDevice;
 }
 
 const DialerUIExtension: UIExtension = {
@@ -63,6 +81,24 @@ const DialerUIExtension: UIExtension = {
                             });
                         }
 
+                    const playSingleTone = async (
+                        tone: number,
+                        audioCtx: AudioContext,
+                        gainNode: GainNode,
+                        toneLength: number
+                    ) => {
+                            return new Promise((res) => {
+                                const oscillator1 = new OscillatorNode(audioCtx, { frequency: tone });
+                            
+                                oscillator1.connect(gainNode);
+                                oscillator1.start();
+                            
+                                oscillator1.onended = res;
+                            
+                                oscillator1.stop(audioCtx.currentTime + toneLength);
+                            });
+                        }
+
                     backendCommunicator.onAsync("dialer:dial-number", async (data: FrontendDialNumberData) => {
                         // @ts-ignore
                         const audioCtx = new AudioContext({ sinkId: await getSinkId(data.audioOutputDevice) });
@@ -84,6 +120,45 @@ const DialerUIExtension: UIExtension = {
                         gainNode.connect(audioCtx.destination);
                             
                         await playTone([350, 440], audioCtx, gainNode, data.toneLength / 1000);
+                    });
+                    
+                    backendCommunicator.onAsync("dialer:play-busy-signal", async (data: FrontendBusySignalData) => {
+                        // @ts-ignore
+                        const audioCtx = new AudioContext({ sinkId: await getSinkId(data.audioOutputDevice) });
+                        const gainNode = new GainNode(audioCtx, { gain: data.volume });
+                        gainNode.connect(audioCtx.destination);
+                            
+                        for (let x = 0; x < data.count - 1; x++) {
+                            await playTone([480, 620], audioCtx, gainNode, (data.fastBusy ? 250 : 500) / 1000);
+                            await delay(data.fastBusy ? 250 : 500);
+                        }
+
+                        await playTone([480, 620], audioCtx, gainNode, (data.fastBusy ? 250 : 500) / 1000);
+                    });
+                    
+                    backendCommunicator.onAsync("dialer:play-wrong-number", async (data: FrontendWrongNumberData) => {
+                        // @ts-ignore
+                        const audioCtx = new AudioContext({ sinkId: await getSinkId(data.audioOutputDevice) });
+                        const gainNode = new GainNode(audioCtx, { gain: data.volume });
+                        gainNode.connect(audioCtx.destination);
+
+                        await playSingleTone(915, audioCtx, gainNode, 276 / 1000);
+                        await playSingleTone(1365, audioCtx, gainNode, 276 / 1000);
+                        await playSingleTone(1765, audioCtx, gainNode, 380 / 1000);
+                    });
+                    
+                    backendCommunicator.onAsync("dialer:play-ringback-tone", async (data: FrontendRingbackToneData) => {
+                        // @ts-ignore
+                        const audioCtx = new AudioContext({ sinkId: await getSinkId(data.audioOutputDevice) });
+                        const gainNode = new GainNode(audioCtx, { gain: data.volume });
+                        gainNode.connect(audioCtx.destination);
+                            
+                        for (let x = 0; x < data.count - 1; x++) {
+                            await playTone([440, 480], audioCtx, gainNode, 2);
+                            await delay(4000);
+                        }
+
+                        await playTone([440, 480], audioCtx, gainNode, 2);
                     });
 
                     logger.debug("Dialer frontend service loaded");

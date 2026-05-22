@@ -1,28 +1,27 @@
-import type { DialNumberData } from "../types";
+import { BusySignalData } from "../types";
 import { Effects } from "@crowbartools/firebot-custom-scripts-types/types/effects";
 import { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-types/types/settings";
-import { PLUGIN_ID, FRONTEND_EVENT_DIAL_NUMBER } from "../constants";
+import { PLUGIN_ID, FRONTEND_EVENT_PLAY_BUSY_SIGNAL } from "../constants";
 import { SharedModules, delay } from "../shared";
 
-type DialNumberEffectData = {
-    numberToDial: string;
-    toneLength: number;
-    delayBetween: number;
+type PlayBusySignalEffectData = {
+    count: number;
+    fastBusy: boolean;
     volume: number;
     audioOutputDevice: FirebotAudioOutputDevice;
     overlayInstance: string;
     waitForSound: boolean;
 }
 
-const DialNumberEffect: Effects.EffectType<
-    DialNumberEffectData,
-    DialNumberData
+const PlayBusySignalEffect: Effects.EffectType<
+    PlayBusySignalEffectData,
+    BusySignalData
 > = {
     definition: {
-        id: `${PLUGIN_ID}:dial-number`,
-        name: "Dial Number",
-        description: "Play DTMF tones to simulate dialing a phone number",
-        icon: "fad fa-phone",
+        id: `${PLUGIN_ID}:play-busy-signal`,
+        name: "Play Busy Signal",
+        description: "Plays a busy signal",
+        icon: "fad fa-phone-slash",
         categories: ["fun",  "overlay"]
     },
     optionsController: ($scope) => {
@@ -31,24 +30,17 @@ const DialNumberEffect: Effects.EffectType<
         }
     },
     optionsTemplate: `
-        <eos-container header="Number to Dial">
-            <firebot-input
-                input-title="Number to dial"
-                model="effect.numberToDial"
-                placeholder-text="Example: 212 555 1234" />
-        </eos-container>
-
         <eos-container header="Settings">
             <firebot-input
-                input-title="Duration of each tone (in ms)"
-                model="effect.toneLength"
-                placeholder-text="Example: 200"
+                input-title="Number of times to play"
+                model="effect.count"
+                placeholder-text="Example: 2"
                 style="margin-bottom: 2rem;" />
-            <firebot-input
-                input-title="Delay between tones (in ms)"
-                model="effect.delayBetween"
-                placeholder-text="Example: 50"
-                style="margin-bottom: 2rem;" />
+            <firebot-checkbox
+                model="effect.fastBusy"
+                label="Fast busy"
+                tooltip="Play a fast busy signal (sometimes called a reorder or congestion tone)."
+            />
             <firebot-checkbox
                 model="effect.waitForSound"
                 label="Wait for sound to finish"
@@ -69,45 +61,22 @@ const DialNumberEffect: Effects.EffectType<
         <eos-overlay-instance effect="effect" ng-if="effect.audioOutputDevice && effect.audioOutputDevice.deviceId === 'overlay'" pad-top="true"></eos-overlay-instance>
     `,
     onTriggerEvent: async ({ effect, sendDataToOverlay }) => {
-        const tones: Record<string, Array<number>> = {
-            "1": [697, 1209],
-            "2": [697, 1336],
-            "3": [697, 1477],
-            "4": [770, 1209],
-            "5": [770, 1336],
-            "6": [770, 1477],
-            "7": [852, 1209],
-            "8": [852, 1336],
-            "9": [852, 1477],
-            "*": [941, 1209],
-            "0": [941, 1336],
-            "#": [941, 1477],
-        };
-
-        const numbersToDial = [...effect.numberToDial];
-        const tonesToDial = [];
-
-        for (const num of numbersToDial) {
-            if (tones.hasOwnProperty(num)) {
-                tonesToDial.push(tones[num]);
-            }
-        }
-
+        const count = effect.count ?? 1;
+        const fastBusy = !!effect.fastBusy;
+        const duration = fastBusy ? 250 : 500;
         const volume = effect.volume / 10;
-        const totalDuation = (tonesToDial.length * effect.toneLength) + ((tonesToDial.length - 1) * effect.delayBetween);
+        const totalDuation = (count * duration * 2) - duration;
 
         if (effect.audioOutputDevice.deviceId === "overlay") {
             sendDataToOverlay({
-                tones: tonesToDial,
-                toneLength: effect.toneLength,
-                delayBetween: effect.delayBetween,
+                count: count,
+                fastBusy: fastBusy,
                 volume: volume
             }, effect.overlayInstance);
         } else {
-            SharedModules.frontendCommunicator.send(FRONTEND_EVENT_DIAL_NUMBER, {
-                tones: tonesToDial,
-                toneLength: effect.toneLength,
-                delayBetween: effect.delayBetween,
+            SharedModules.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_BUSY_SIGNAL, {
+                count: count,
+                fastBusy: fastBusy,
                 volume: volume,
                 audioOutputDevice: effect.audioOutputDevice
             });
@@ -121,7 +90,7 @@ const DialNumberEffect: Effects.EffectType<
     },
     overlayExtension: {
         event: {
-            name: `${PLUGIN_ID}:dial-numbers`,
+            name: `${PLUGIN_ID}:play-busy-signal`,
             onOverlayEvent: async (data) => {
                 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
                 const audioCtx = new AudioContext();
@@ -140,20 +109,20 @@ const DialNumberEffect: Effects.EffectType<
 
                         oscillator1.onended = res;
 
-                        oscillator1.stop(audioCtx.currentTime + (data.toneLength / 1000));
-                        oscillator2.stop(audioCtx.currentTime + (data.toneLength / 1000));
+                        oscillator1.stop(audioCtx.currentTime + ((data.fastBusy ? 250 : 500) / 1000));
+                        oscillator2.stop(audioCtx.currentTime + ((data.fastBusy ? 250 : 500) / 1000));
                     });
                 }
 
-                for (let x = 0; x < data.tones.length - 1; x++) {
-                    await playTone(data.tones[x]);
-                    await delay(data.delayBetween);
+                for (let x = 0; x < data.count - 1; x++) {
+                    await playTone([480, 620]);
+                    await delay(data.fastBusy ? 250 : 500);
                 }
 
-                await playTone(data.tones[data.tones.length - 1]);
+                await playTone([480, 620]);
             }
         }
     }
 }
 
-export default DialNumberEffect;
+export default PlayBusySignalEffect;
