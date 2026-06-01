@@ -18,6 +18,9 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".js"],
   },
+  externals: {
+    "@crowbartools/firebot-types": "commonjs2 @crowbartools/firebot-types"
+  },
   module: {
     rules: [
       {

@@ -1,17 +1,17 @@
 import type { RingbackToneData } from "../types";
-import * as Firebot from "@crowbartools/firebot-types";
+import firebot, { EffectType, FirebotAudioDevice } from "@crowbartools/firebot-types";
 import { PLUGIN_ID, FRONTEND_EVENT_PLAY_RINGBACK_TONE } from "../constants";
 import { delay } from "../shared";
 
 type PlayRingbackToneEffectData = {
     count: number;
     volume: number;
-    audioOutputDevice: Firebot.FirebotAudioDevice;
+    audioOutputDevice: FirebotAudioDevice;
     overlayInstance: string;
     waitForSound: boolean;
 }
 
-const PlayRingbackToneEffect: Firebot.EffectType<
+const PlayRingbackToneEffect: EffectType<
     PlayRingbackToneEffectData,
     RingbackToneData
 > = {
@@ -64,7 +64,7 @@ const PlayRingbackToneEffect: Firebot.EffectType<
                 volume: volume
             }, effect.overlayInstance);
         } else {
-            Firebot.default.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_RINGBACK_TONE, {
+            firebot.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_RINGBACK_TONE, {
                 count: count,
                 volume: volume,
                 audioOutputDevice: effect.audioOutputDevice

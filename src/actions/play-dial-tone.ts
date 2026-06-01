@@ -1,17 +1,17 @@
 import type { DialToneData } from "../types";
-import * as Firebot from "@crowbartools/firebot-types";
+import firebot, { EffectType, FirebotAudioDevice } from "@crowbartools/firebot-types";
 import { PLUGIN_ID, FRONTEND_EVENT_PLAY_DIAL_TONE } from "../constants";
 import { delay } from "../shared";
 
 type PlayDialToneEffectData = {
     toneLength: number;
     volume: number;
-    audioOutputDevice: Firebot.FirebotAudioDevice;
+    audioOutputDevice: FirebotAudioDevice;
     overlayInstance: string;
     waitForSound: boolean;
 }
 
-const PlayDialToneEffect: Firebot.EffectType<
+const PlayDialToneEffect: EffectType<
     PlayDialToneEffectData,
     DialToneData
 > = {
@@ -62,7 +62,7 @@ const PlayDialToneEffect: Firebot.EffectType<
                 volume: volume
             }, effect.overlayInstance);
         } else {
-            Firebot.default.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_DIAL_TONE, {
+            firebot.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_DIAL_TONE, {
                 toneLength: effect.toneLength,
                 volume: volume,
                 audioOutputDevice: effect.audioOutputDevice
