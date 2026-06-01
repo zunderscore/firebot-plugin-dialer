@@ -1,5 +1,4 @@
-import type { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-types/types/settings";
-import type { UIExtension } from "@crowbartools/firebot-custom-scripts-types/types/modules/ui-extension-manager";
+import type { FirebotAudioDevice, UIExtension } from "@crowbartools/firebot-types";
 import type {
     BusySignalData,
     DialNumberData,
@@ -9,23 +8,23 @@ import type {
 } from "./types";
 
 type FrontendDialNumberData = DialNumberData & {
-    audioOutputDevice: FirebotAudioOutputDevice
+    audioOutputDevice: FirebotAudioDevice
 }
 
 type FrontendDialToneData = DialToneData & {
-    audioOutputDevice: FirebotAudioOutputDevice
+    audioOutputDevice: FirebotAudioDevice
 }
 
 type FrontendBusySignalData = BusySignalData & {
-    audioOutputDevice: FirebotAudioOutputDevice
+    audioOutputDevice: FirebotAudioDevice
 }
 
 type FrontendWrongNumberData = WrongNumberData & {
-    audioOutputDevice: FirebotAudioOutputDevice;
+    audioOutputDevice: FirebotAudioDevice;
 }
 
 type FrontendRingbackToneData = RingbackToneData & {
-    audioOutputDevice: FirebotAudioOutputDevice;
+    audioOutputDevice: FirebotAudioDevice;
 }
 
 const DialerUIExtension: UIExtension = {
@@ -44,14 +43,14 @@ const DialerUIExtension: UIExtension = {
 
                     const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-                    const getSinkId = async (outputDevice: FirebotAudioOutputDevice) => {
+                    const getSinkId = async (outputDevice: FirebotAudioDevice) => {
                         if (outputDevice == null
                             || outputDevice.label === "App Default"
                         ) {
                             outputDevice = settingsService.getSetting("AudioOutputDevice");
                         }
 
-                        const deviceList: FirebotAudioOutputDevice[] = await soundService.getOutputDevices();
+                        const deviceList: FirebotAudioDevice[] = await soundService.getOutputDevices();
 
                         const filteredDevice = deviceList.find(d => d.label === outputDevice.label
                             || d.deviceId === outputDevice.deviceId);

@@ -1,20 +1,19 @@
 import type { DialNumberData } from "../types";
-import { Effects } from "@crowbartools/firebot-custom-scripts-types/types/effects";
-import { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-types/types/settings";
+import * as Firebot from "@crowbartools/firebot-types";
 import { PLUGIN_ID, FRONTEND_EVENT_DIAL_NUMBER } from "../constants";
-import { SharedModules, delay } from "../shared";
+import { delay } from "../shared";
 
 type DialNumberEffectData = {
     numberToDial: string;
     toneLength: number;
     delayBetween: number;
     volume: number;
-    audioOutputDevice: FirebotAudioOutputDevice;
+    audioOutputDevice: Firebot.FirebotAudioDevice;
     overlayInstance: string;
     waitForSound: boolean;
 }
 
-const DialNumberEffect: Effects.EffectType<
+const DialNumberEffect: Firebot.EffectType<
     DialNumberEffectData,
     DialNumberData
 > = {
@@ -104,7 +103,7 @@ const DialNumberEffect: Effects.EffectType<
                 volume: volume
             }, effect.overlayInstance);
         } else {
-            SharedModules.frontendCommunicator.send(FRONTEND_EVENT_DIAL_NUMBER, {
+            Firebot.default.frontendCommunicator.send(FRONTEND_EVENT_DIAL_NUMBER, {
                 tones: tonesToDial,
                 toneLength: effect.toneLength,
                 delayBetween: effect.delayBetween,

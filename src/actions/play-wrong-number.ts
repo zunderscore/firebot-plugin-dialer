@@ -1,17 +1,16 @@
 import type { WrongNumberData } from "../types";
-import { Effects } from "@crowbartools/firebot-custom-scripts-types/types/effects";
-import { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-types/types/settings";
+import * as Firebot from "@crowbartools/firebot-types";
 import { PLUGIN_ID, FRONTEND_EVENT_PLAY_WRONG_NUMBER } from "../constants";
-import { SharedModules, delay } from "../shared";
+import { delay } from "../shared";
 
 type PlayWrongNumberEffectData = {
     volume: number;
-    audioOutputDevice: FirebotAudioOutputDevice;
+    audioOutputDevice: Firebot.FirebotAudioDevice;
     overlayInstance: string;
     waitForSound: boolean;
 }
 
-const PlayWrongNumberEffect: Effects.EffectType<
+const PlayWrongNumberEffect: Firebot.EffectType<
     PlayWrongNumberEffectData,
     WrongNumberData
 > = {
@@ -56,7 +55,7 @@ const PlayWrongNumberEffect: Effects.EffectType<
                 volume: volume
             }, effect.overlayInstance);
         } else {
-            SharedModules.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_WRONG_NUMBER, {
+            Firebot.default.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_WRONG_NUMBER, {
                 volume: volume,
                 audioOutputDevice: effect.audioOutputDevice
             });

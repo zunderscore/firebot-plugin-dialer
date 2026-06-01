@@ -1,19 +1,18 @@
-import { BusySignalData } from "../types";
-import { Effects } from "@crowbartools/firebot-custom-scripts-types/types/effects";
-import { FirebotAudioOutputDevice } from "@crowbartools/firebot-custom-scripts-types/types/settings";
+import type { BusySignalData } from "../types";
+import * as Firebot from "@crowbartools/firebot-types";
 import { PLUGIN_ID, FRONTEND_EVENT_PLAY_BUSY_SIGNAL } from "../constants";
-import { SharedModules, delay } from "../shared";
+import { delay } from "../shared";
 
 type PlayBusySignalEffectData = {
     count: number;
     fastBusy: boolean;
     volume: number;
-    audioOutputDevice: FirebotAudioOutputDevice;
+    audioOutputDevice: Firebot.FirebotAudioDevice;
     overlayInstance: string;
     waitForSound: boolean;
 }
 
-const PlayBusySignalEffect: Effects.EffectType<
+const PlayBusySignalEffect: Firebot.EffectType<
     PlayBusySignalEffectData,
     BusySignalData
 > = {
@@ -74,7 +73,7 @@ const PlayBusySignalEffect: Effects.EffectType<
                 volume: volume
             }, effect.overlayInstance);
         } else {
-            SharedModules.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_BUSY_SIGNAL, {
+            Firebot.default.frontendCommunicator.fireEventAsync(FRONTEND_EVENT_PLAY_BUSY_SIGNAL, {
                 count: count,
                 fastBusy: fastBusy,
                 volume: volume,
