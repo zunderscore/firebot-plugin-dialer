@@ -13,12 +13,14 @@ const packageInfo = require("../package.json");
 
 const script: Plugin = {
     manifest: {
+        type: "plugin",
+        icon: "fa-phone",
         name: PLUGIN_NAME,
         description: packageInfo.description,
         author: packageInfo.author,
         version: packageInfo.version,
         minimumFirebotVersion: { major: 5, minor: 67 },
-        type: "plugin"
+        repo: "https://github.com/zunderscore/firebot-plugin-dialer"
     },
     registers: {
         effects: [
