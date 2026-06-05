@@ -19,7 +19,7 @@ const PlayWrongNumberEffect: EffectType<
         name: "Play Wrong Number Tone",
         description: "Play a wrong number tone",
         icon: "fad fa-phone-slash",
-        categories: ["fun",  "overlay"]
+        categories: ["fun", "overlay"]
     },
     optionsController: ($scope) => {
         if ($scope.effect.volume == null) {
@@ -96,4 +96,4 @@ const PlayWrongNumberEffect: EffectType<
     }
 }
 
-export default PlayWrongNumberEffect;
+export { PlayWrongNumberEffect };

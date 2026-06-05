@@ -1,20 +1,17 @@
-import { Plugin } from "@crowbartools/firebot-types";
+import type { Plugin } from "@crowbartools/firebot-types";
 
 import { PLUGIN_NAME } from "./constants";
 
-import DialNumberEffect from "./actions/dial-number";
-import PlayDialToneEffect from "./actions/play-dial-tone";
-import PlayBusySignalEffect from "./actions/play-busy-signal";
-import PlayWrongNumberEffect from "./actions/play-wrong-number";
-import PlayRingbackToneEffect from "./actions/play-ringback-tone";
-import DialerUIExtension from "./ui-extension";
+import actions from "./actions";
+import { DialerUIExtension } from "./ui-extension";
 
 const packageInfo = require("../package.json");
 
 const script: Plugin = {
     manifest: {
         type: "plugin",
-        icon: "fa-phone",
+        icon: "fa-phone-rotary",
+        color: "#CC0000",
         name: PLUGIN_NAME,
         description: packageInfo.description,
         author: packageInfo.author,
@@ -23,13 +20,7 @@ const script: Plugin = {
         repo: "https://github.com/zunderscore/firebot-plugin-dialer"
     },
     registers: {
-        effects: [
-            DialNumberEffect,
-            PlayDialToneEffect,
-            PlayBusySignalEffect,
-            PlayWrongNumberEffect,
-            PlayRingbackToneEffect
-        ],
+        effects: actions,
         uiExtensions: [
             DialerUIExtension
         ]

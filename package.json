@@ -1,7 +1,7 @@
 {
   "name": "firebot-plugin-dialer",
   "scriptOutputName": "firebot-dialer",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "A Firebot plugin that generates and plays DTMF tones",
   "main": "",
   "scripts": {

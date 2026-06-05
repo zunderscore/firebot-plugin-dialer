@@ -22,7 +22,7 @@ const DialNumberEffect: EffectType<
         name: "Dial Number",
         description: "Play DTMF tones to simulate dialing a phone number",
         icon: "fad fa-phone",
-        categories: ["fun",  "overlay"]
+        categories: ["fun", "overlay"]
     },
     optionsController: ($scope) => {
         if ($scope.effect.volume == null) {
@@ -155,4 +155,4 @@ const DialNumberEffect: EffectType<
     }
 }
 
-export default DialNumberEffect;
+export { DialNumberEffect };

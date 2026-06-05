@@ -20,7 +20,7 @@ const PlayRingbackToneEffect: EffectType<
         name: "Play Ringback Tone",
         description: "Plays a ringback tone",
         icon: "fad fa-phone",
-        categories: ["fun",  "overlay"]
+        categories: ["fun", "overlay"]
     },
     optionsController: ($scope) => {
         if ($scope.effect.volume == null) {
@@ -114,4 +114,4 @@ const PlayRingbackToneEffect: EffectType<
     }
 }
 
-export default PlayRingbackToneEffect;
+export { PlayRingbackToneEffect };

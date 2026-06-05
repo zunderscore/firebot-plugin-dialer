@@ -20,7 +20,7 @@ const PlayDialToneEffect: EffectType<
         name: "Play Dial Tone",
         description: "Play a dial tone",
         icon: "fad fa-phone",
-        categories: ["fun",  "overlay"]
+        categories: ["fun", "overlay"]
     },
     optionsController: ($scope) => {
         if ($scope.effect.volume == null) {
@@ -106,4 +106,4 @@ const PlayDialToneEffect: EffectType<
     }
 }
 
-export default PlayDialToneEffect;
+export { PlayDialToneEffect };

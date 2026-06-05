@@ -21,7 +21,7 @@ const PlayBusySignalEffect: EffectType<
         name: "Play Busy Signal",
         description: "Plays a busy signal",
         icon: "fad fa-phone-slash",
-        categories: ["fun",  "overlay"]
+        categories: ["fun", "overlay"]
     },
     optionsController: ($scope) => {
         if ($scope.effect.volume == null) {
@@ -124,4 +124,4 @@ const PlayBusySignalEffect: EffectType<
     }
 }
 
-export default PlayBusySignalEffect;
+export { PlayBusySignalEffect };
