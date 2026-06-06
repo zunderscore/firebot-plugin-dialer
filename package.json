@@ -1,6 +1,6 @@
 {
   "name": "firebot-plugin-dialer",
-  "scriptOutputName": "firebot-dialer",
+  "pluginOutputName": "firebot-dialer",
   "version": "2.0.0",
   "description": "A Firebot plugin that generates and plays DTMF tones",
   "main": "",
@@ -13,7 +13,7 @@
   "author": "zunderscore",
   "license": "MIT",
   "devDependencies": {
-    "@crowbartools/firebot-types": "^5.67.0-alpha8",
+    "@crowbartools/firebot-types": "^5.67.0-alpha15",
     "@types/node": "^24.3.3",
     "jest": "^30.1.3",
     "terser-webpack-plugin": "^5.3.14",
